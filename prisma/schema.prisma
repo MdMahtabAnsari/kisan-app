@@ -1,0 +1,181 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String      @id
+  name                String
+  email               String
+  emailVerified       Boolean     @default(false)
+  image               String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  phoneNumber         String?
+  phoneNumberVerified Boolean?
+  twoFactorEnabled    Boolean?    @default(false)
+  username            String?
+  displayUsername     String?
+  role                String?
+  banned              Boolean?    @default(false)
+  banReason           String?
+  banExpires          DateTime?
+  aadhaarNumber       String
+  sessions            Session[]
+  accounts            Account[]
+  twofactors          TwoFactor[]
+  wallets             Wallet[]
+  recharges           Recharge[]
+
+  @@unique([email])
+  @@unique([phoneNumber])
+  @@unique([username])
+  @@unique([aadhaarNumber])
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model TwoFactor {
+  id          String @id
+  secret      String
+  backupCodes String
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([secret])
+  @@index([userId])
+  @@map("twoFactor")
+}
+
+enum WalletType {
+  STANDARD
+  PREMIUM
+  VIP
+}
+
+model Wallet {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points    Decimal    @default(0) @db.Decimal(10, 2)
+  type      WalletType @default(STANDARD)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  recharges Recharge[]
+
+  @@unique([userId, type])
+  @@index([userId])
+}
+
+model RechargeExchangeRate {
+  id         String     @id @default(uuid())
+  walletType WalletType
+  points     Decimal    @db.Decimal(10, 2)
+  amount     Decimal    @db.Decimal(10, 2)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  recharges  Recharge[]
+
+  @@map("rechargeExchangeRate")
+}
+
+model Recharge {
+  id               String               @id @default(uuid())
+  userId           String
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId         String
+  wallet           Wallet               @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  exchangeRateId   String
+  exchangeRate     RechargeExchangeRate @relation(fields: [exchangeRateId], references: [id], onDelete: Cascade)
+  amount           Decimal              @db.Decimal(10, 2)
+  points           Decimal              @db.Decimal(10, 2)
+  orderId          String               @unique
+  status           RechargeStatus       @default(PENDING)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  providerPayments ProviderPayment?
+}
+
+model ProviderPayment {
+  id                String          @id @default(uuid())
+  provider          PaymentProvider
+  providerPaymentId String // unique per provider
+  rechargeId        String          @unique
+  recharge          Recharge        @relation(fields: [rechargeId], references: [id], onDelete: Cascade)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([provider, providerPaymentId])
+}
+
+enum PaymentProvider {
+  RAZORPAY
+  PHONEPE
+  STRIPE
+  PAYU
+}
+
+enum RechargeStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
