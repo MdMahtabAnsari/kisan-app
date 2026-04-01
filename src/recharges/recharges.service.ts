@@ -43,7 +43,6 @@ export class RechargesService {
         walletId: wallet.id,
       },
     );
-    console.log('orderId', order.id);
     const createRechargeDto: CreateRechargeDto = {
       userId,
       walletId: wallet.id,
@@ -76,7 +75,6 @@ export class RechargesService {
       paymentId,
       signature,
     );
-    console.log('isValid', isValid);
     if (!isValid) {
       throw new BadRequestException('Invalid payment signature');
     }
