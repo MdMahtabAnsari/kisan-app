@@ -6,7 +6,6 @@ import {
 import { RechargesRepository } from './recharges.repository';
 import { WalletsRepository } from 'src/wallets/wallets.repository';
 import { CreateRechargeDto } from './dto/createRecharge.dto';
-import { randomUUID } from 'crypto';
 import { RazorpayService } from 'src/payments/razorpay.service';
 import { Transactional } from '@nestjs-cls/transactional';
 import { WalletType } from 'generated/prisma/enums';
@@ -77,6 +76,7 @@ export class RechargesService {
       paymentId,
       signature,
     );
+    console.log('isValid', isValid);
     if (!isValid) {
       throw new BadRequestException('Invalid payment signature');
     }

@@ -35,7 +35,7 @@ export class RazorpayService {
     });
   }
 
-  verifyPayment(paymentId: string, orderId: string, signature: string) {
+  verifyPayment(orderId: string, paymentId: string, signature: string) {
     const secret = process.env['RAZORPAY_KEY_SECRET'];
     if (!secret) {
       throw new Error(
