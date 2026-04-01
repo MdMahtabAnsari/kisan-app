@@ -31,4 +31,36 @@ export class UsersRepository {
       },
     });
   }
+
+  async isEmailExists(email: string) {
+    return this.prisma.tx.user.findFirst({
+      where: {
+        email: email,
+      },
+    });
+  }
+
+  async isUsernameExists(username: string) {
+    return this.prisma.tx.user.findFirst({
+      where: {
+        username: username,
+      },
+    });
+  }
+
+  async isPhoneNumberExists(phoneNumber: string) {
+    return this.prisma.tx.user.findFirst({
+      where: {
+        phoneNumber: phoneNumber,
+      },
+    });
+  }
+
+  async isAadhaarNumberExists(aadhaarNumber: string) {
+    return this.prisma.tx.user.findFirst({
+      where: {
+        aadhaarNumber: aadhaarNumber,
+      },
+    });
+  }
 }
