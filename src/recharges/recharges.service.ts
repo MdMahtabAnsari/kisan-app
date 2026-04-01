@@ -44,6 +44,7 @@ export class RechargesService {
         walletId: wallet.id,
       },
     );
+    console.log('orderId', order.id);
     const createRechargeDto: CreateRechargeDto = {
       userId,
       walletId: wallet.id,
