@@ -60,8 +60,14 @@ export class RechargesService {
 
   @Transactional()
   async verifyRecharge(orderId: string, paymentId: string, signature: string) {
+    console.log('data', {
+      orderId,
+      paymentId,
+      signature,
+    });
     const recharge =
       await this.rechargesRepository.getRechargeByOrderId(orderId);
+    console.log('recharge', recharge);
     if (!recharge) {
       throw new NotFoundException('Recharge not found for the order ID');
     }
