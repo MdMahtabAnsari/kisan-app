@@ -51,7 +51,7 @@ export class RechargesService {
       exchangeRateId: exchangeRate.id,
       amount: Number(exchangeRate.amount),
       points: Number(exchangeRate.points),
-      orderId: randomUUID(),
+      orderId: order.id,
     };
 
     await this.rechargesRepository.createRecharge(createRechargeDto);
