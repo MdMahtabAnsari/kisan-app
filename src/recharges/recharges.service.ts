@@ -36,7 +36,7 @@ export class RechargesService {
       );
     }
     const order = await this.razorpayService.createOrder(
-      Number(exchangeRate.amount) * 100,
+      Number(exchangeRate.amount),
       'INR',
       'Recharge',
       {
